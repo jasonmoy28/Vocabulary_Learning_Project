@@ -19,7 +19,7 @@ ExtraSubject = c(4,49,61,74,92,93,96,121,128,132,135,153,158,200,201,208,212,219
 S1 = S1 %>% filter(!Subject %in% ExtraSubject)
 
 S2 = S2 %>% filter(!Subject %in% ExtraSubject)
-#LSM = read_csv('/Users/Jasonmoy/Desktop/LSM.csv') #don't know what this is 
+LSM = read_csv('https://raw.githubusercontent.com/jasonmoy28/Vocabulary_Learning_Project/master/R/Code/LSM.csv') #don't know what this is 
 
 # Exclude subject for other reasons 
 ## Subject 136 is excluded since the participants enter NA for all value 
