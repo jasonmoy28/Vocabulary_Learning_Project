@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = FALSE, message=FALSE,warning = FALSE, comment = NA)
 
 ### Description 
 1. The plots used proportion correct as dependent variable  
-2. Please refer to the [manuscript](/manuscript/Moy_Jason_honorthesis_2020.pdf) for a complete description of the method and analysis used  
+2. Please refer to the [manuscript](/Vocabulary_Learning_Project/Manuscript/Moy_Jason_honorthesis_2020.pdf) for a complete description of the method and analysis used  
 
 ```{r data processing}
 SSM = read_csv('https://raw.githubusercontent.com/jasonmoy28/Vocabulary_Learning_Project/master/data-raw/SSM.csv')
