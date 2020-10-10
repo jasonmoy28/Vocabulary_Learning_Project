@@ -4,22 +4,14 @@ author: "Jason Moy"
 date: "1/14/2020"
 output: pdf_document
 ---
-```{r setup,include =FALSE}
-suppressMessages(library('tidyverse'))
-library('reticulate')
-use_condaenv(condaenv = 'anaconda3',conda = '/Users/Jasonmoy/opt/anaconda3/bin/conda')
-```
-
 # Validation 
 ## Training Task Time 
 ```{r Initial setup, include = F}
-suppressMessages(library('readr'))
-suppressMessages(library('tidyverse'))
-suppressMessages(library('rstatix'))
+library(Vocabulary.Learning)
 S1 = read_csv('S1.csv')
 S2 = read_csv('S2.csv')
 
-LenientScoreRawData = read.csv('/Users/Jasonmoy/Desktop/Research/Vocabulary Learing Project/Code/LenientScoringMaster.csv') %>% rename(Subject = 1)
+LenientScoreRawData = read.csv('https://raw.githubusercontent.com/jasonmoy28/Vocabulary_Learning_Project/master/R/Code/LenientScoringMaster.csv') %>% rename(Subject = 1)
 LenientScoreRawData = LenientScoreRawData %>% rename(Code = FinalCode) %>% mutate(Code = as.numeric(as.character(Code)))
 
 #Exclude subject have 10+ known words 
@@ -27,7 +19,8 @@ ExtraSubject = c(4,49,61,74,92,93,96,121,128,132,135,153,158,200,201,208,212,219
 S1 = S1 %>% filter(!Subject %in% ExtraSubject)
 
 S2 = S2 %>% filter(!Subject %in% ExtraSubject)
-LSM = read_csv('/Users/Jasonmoy/Desktop/LSM.csv')
+#LSM = read_csv('/Users/Jasonmoy/Desktop/LSM.csv') #don't know what this is 
+
 # Exclude subject for other reasons 
 ## Subject 136 is excluded since the participants enter NA for all value 
 AddtionalExlcusion = c(136)

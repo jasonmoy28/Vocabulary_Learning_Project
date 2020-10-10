@@ -18,10 +18,12 @@ navbar:
       - text: APA6 PDF
         href: manuscript/Moy_Jason_honorthesis_2020.pdf
     articles:
-      text: Supplementary
+      text: graph
       menu:
-      - text: Supplementary
-        href: articles/som.html
+      - text: Efficiency Graph
+        href: articles/graph/efficiency_graph.html
+      - text: Proportion Correct Graph
+        href: articles/graph/proportion_correct_graph.html
     posters:
       text: Posters
       menu:
@@ -31,9 +33,9 @@ navbar:
       text: Functions
       href: reference/index.html
     github:
-      text: source code
+      text: Source Code
       icon: fa-lg fa-github
-      href: https://github.com/user/repo
+      href:
 
 home:
   strip_header: true

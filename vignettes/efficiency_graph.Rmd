@@ -1,0 +1,184 @@
+---
+title: "Vocabulary Learning Project Efficiency Graph"
+author: "Jason Moy"
+output: html_document
+---
+
+```{r setup,include =FALSE}
+library(Vocabulary.Learning)
+knitr::opts_chunk$set(echo = FALSE, message=FALSE,warning = FALSE, comment = NA)
+```
+
+### Description 
+1. The plots used efficiency (defined by words learned per minute) as dependent variable  
+2. Please refer to the [manuscript](/manuscript/Moy_Jason_honorthesis_2020.pdf) for a complete description of the method and analysis used  
+
+```{r data processing}
+SSM = read_csv('https://raw.githubusercontent.com/jasonmoy28/Vocabulary_Learning_Project/master/data-raw/SSM.csv')
+LSM = read_csv('https://raw.githubusercontent.com/jasonmoy28/Vocabulary_Learning_Project/master/data-raw/LSM.csv')
+
+SSM_E_mean = SSM %>% group_by(FinalTestCondition,TrainingTask) %>% summarise(mean = mean(`Efficiency(Word Learned /Minute)`))
+LSM_E_mean = LSM %>% group_by(FinalTestCondition,TrainingTask) %>% summarise(mean = mean(`Efficiency (Word Learned/Minute)`))
+
+StrictScoringSummaryStatEfficiency = 
+  Rmisc::summarySEwithin(SSM,
+                         idvar = 'Subject',
+                         withinvars = 'TrainingTask',
+                         betweenvars = 'FinalTestCondition',
+                         measurevar = 'Efficiency(Word Learned /Minute)') %>% 
+  mutate(`Efficiency(Word Learned /Minute)` = SSM_E_mean$mean) %>% 
+  rename(Efficiency = `Efficiency(Word Learned /Minute)`)
+
+
+
+LenientScoringSummaryStatEfficiency = 
+  Rmisc::summarySEwithin(LSM,
+                         idvar = 'Subject',
+                         withinvars = 'TrainingTask',
+                         betweenvars = 'FinalTestCondition',
+                         measurevar = 'Efficiency (Word Learned/Minute)') %>% 
+  mutate(`Efficiency (Word Learned/Minute)` = LSM_E_mean$mean) %>% 
+  rename(Efficiency = `Efficiency (Word Learned/Minute)`)
+```
+
+### Strict Scoring Productive Final Test 
+```{r SS + Productive}
+SS_productive_E = StrictScoringSummaryStatEfficiency %>% filter(FinalTestCondition == 'CE') %>%
+  ggplot(data =.,
+         aes(x = TrainingTask,y = Efficiency,fill = TrainingTask)) +
+  geom_bar(stat = 'identity',width = 0.5,color = 'black') +
+  geom_errorbar(aes(ymin = Efficiency - se, ymax = Efficiency + se),
+                position=position_dodge(0.9),width = 0.05) +
+  labs(y = 'Efficiency (Word Learned/Minute)',
+       x = 'Strict Scoring - Productive Final Test') + # edit title here
+  scale_fill_manual(values = c('#eff3ff','#bdd7e7','#6baed6','#2171b5'),
+                    labels = c('Productive','Receptive','Picture + Producive','Restudy'),
+                    name = '') +
+  scale_x_discrete(labels=c("CE" = "Productive", "EC" = "Receptive",
+                            "PI" = "Productive + Picture", 'RE' = 'Restudy')) +
+  ylim(0,1.5) +
+  theme_classic() +
+  theme(legend.position=c(0.5,.9),
+        legend.key.size = unit(0.4,'cm'),
+        legend.direction = 'horizontal',
+        axis.title.x = element_text(size = 13,vjust = -.6),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        aspect.ratio = .85,
+        panel.background = element_rect(colour = "black", size=1)) +
+  geom_text(aes(label = format(Efficiency,digits = 3)),
+            vjust = 2.7,
+            colour = c('#000000','#000000','#000000','#FFFFFF'))
+print(SS_productive_E)
+```
+
+### Strict Scoring Receptive Final Test
+```{r SS + Receptive}
+SS_receptive_E = StrictScoringSummaryStatEfficiency %>% filter(FinalTestCondition == 'EC') %>%
+  ggplot(data =.,
+         aes(x = TrainingTask,y = Efficiency,fill = TrainingTask)) +
+  geom_bar(stat = 'identity',width = 0.5,color = 'black') +
+  geom_errorbar(aes(ymin = Efficiency - se, ymax = Efficiency + se),
+                position=position_dodge(0.9),width = 0.05) +
+  labs(y = 'Efficiency (Word Learned/Minute)',
+       x = 'Strict Scoring - Receptive Final Test') + # edit title here
+  scale_fill_manual(values = c('#eff3ff','#bdd7e7','#6baed6','#2171b5'),
+                    labels = c('Productive','Receptive','Picture + Producive','Restudy'),
+                    name = '') +
+  scale_x_discrete(labels=c("CE" = "Productive", "EC" = "Receptive",
+                            "PI" = "Productive + Picture", 'RE' = 'Restudy')) +
+  ylim(0,1.5) +
+  theme_classic() +
+  theme(legend.position=c(0.5,.9),
+        legend.key.size = unit(0.4,'cm'),
+        legend.direction = 'horizontal',
+        axis.title.x = element_text(size = 13,vjust = -.6),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        aspect.ratio = .85,
+        panel.background = element_rect(colour = "black", size=1)) +
+  geom_text(aes(label = format(Efficiency,digits = 3)),
+            vjust = 2.7,
+            colour = c('#000000','#000000','#000000','#FFFFFF'))
+print(SS_receptive_E)
+```
+
+### Lenient Scoring Productive Final Test
+```{r LS + Productive}
+LS_productive_E = LenientScoringSummaryStatEfficiency %>% filter(FinalTestCondition == 'CE') %>%
+  ggplot(data =.,
+         aes(x = TrainingTask,y = Efficiency,fill = TrainingTask)) +
+  geom_bar(stat = 'identity',width = 0.5,color = 'black') +
+  geom_errorbar(aes(ymin = Efficiency - se, ymax = Efficiency + se),
+                position=position_dodge(0.9),width = 0.05) +
+  labs(y = 'Efficiency (Word Learned/Minute)',
+       x = 'Lenient Scoring - Productive Final Test') + # edit title here
+  scale_fill_manual(values = c('#eff3ff','#bdd7e7','#6baed6','#2171b5'),
+                    labels = c('Productive','Receptive','Picture + Producive','Restudy'),
+                    name = '') +
+  scale_x_discrete(labels=c("CE" = "Productive", "EC" = "Receptive",
+                            "PI" = "Productive + Picture", 'RE' = 'Restudy')) +
+  ylim(0,1.5) +
+  theme_classic() +
+  theme(legend.position=c(0.5,.9),
+        legend.key.size = unit(0.4,'cm'),
+        legend.direction = 'horizontal',
+        axis.title.x = element_text(size = 13,vjust = -.6),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        aspect.ratio = .85,
+        panel.background = element_rect(colour = "black", size=1)) +
+  geom_text(aes(label = format(Efficiency,digits = 3)),
+            vjust = 2.7,
+            colour = c('#000000','#000000','#000000','#FFFFFF'))
+print(LS_productive_E)
+```
+
+### Lenient Scoring Receptive Final Test
+```{r LS + Receptive}
+LS_receptive_E = LenientScoringSummaryStatEfficiency %>% filter(FinalTestCondition == 'EC') %>%
+  ggplot(data =.,
+         aes(x = TrainingTask,y = Efficiency,fill = TrainingTask)) +
+  geom_bar(stat = 'identity',width = 0.5,color = 'black') +
+  geom_errorbar(aes(ymin = Efficiency - se, ymax = Efficiency + se),
+                position=position_dodge(0.9),width = 0.05) +
+  labs(y = 'Efficiency (Word Learned/Minute)',
+       x = 'Lenient Scoring - Receptive Final Test') + # edit title here
+  scale_fill_manual(values = c('#eff3ff','#bdd7e7','#6baed6','#2171b5'),
+                    labels = c('Productive','Receptive','Picture + Producive','Restudy'),
+                    name = '') +
+  scale_x_discrete(labels=c("CE" = "Productive", "EC" = "Receptive",
+                            "PI" = "Productive + Picture", 'RE' = 'Restudy')) +
+  ylim(0,1.5) +
+  theme_classic() +
+  theme(legend.position=c(0.5,.9),
+        legend.key.size = unit(0.4,'cm'),
+        legend.direction = 'horizontal',
+        axis.title.x = element_text(size = 13,vjust = -.6),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        aspect.ratio = .85,
+        panel.background = element_rect(colour = "black", size=1)) +
+  geom_text(aes(label = format(Efficiency,digits = 3)),
+            vjust = 2.7,
+            colour = c('#000000','#000000','#000000','#FFFFFF'))
+print(LS_receptive_E)
+```
+
+```{r Output picture, eval = F}
+# Output picture
+jpg_name = paste('SS_productive_E','.jpg',sep = '')
+jpeg(jpg_name,width = 550,height = 430,res = 100)
+SS_productive_E
+dev.off()
+
+jpg_name = paste('SS_receptive_E','.jpg',sep = '')
+jpeg(jpg_name,width = 550,height = 430,res = 100)
+SS_receptive_E
+dev.off()
+
+jpg_name = paste('LS_productive_E','.jpg',sep = '')
+jpeg(jpg_name,width = 550,height = 430,res = 100)
+LS_productive_E
+dev.off()
+```

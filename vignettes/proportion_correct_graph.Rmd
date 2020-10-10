@@ -1,44 +1,58 @@
-SSM = read_csv('/Users/Jasonmoy/Desktop/Research/Vocabulary Learing Project/Final Product/Picture/Generating Code/SSM.csv')
-LSM = read_csv('/Users/Jasonmoy/Desktop/Research/Vocabulary Learing Project/Final Product/Picture/Generating Code/LSM.csv')
+---
+title: "Vocabulary Learning Project Proportion Correct Graph"
+author: "Jason Moy"
+output: html_document
+---
 
-SSM_E_mean = SSM %>% group_by(FinalTestCondition,TrainingTask) %>% summarise(mean = mean(`Efficiency(Word Learned /Minute)`))
-LSM_E_mean = LSM %>% group_by(FinalTestCondition,TrainingTask) %>% summarise(mean = mean(`Efficiency (Word Learned/Minute)`))
+```{r setup,include =FALSE}
+library(Vocabulary.Learning)
+knitr::opts_chunk$set(echo = FALSE, message=FALSE,warning = FALSE, comment = NA)
+```
 
-StrictScoringSummaryStatEfficiency = 
+### Description 
+1. The plots used proportion correct as dependent variable  
+2. Please refer to the [manuscript](/manuscript/Moy_Jason_honorthesis_2020.pdf) for a complete description of the method and analysis used  
+
+```{r data processing}
+SSM = read_csv('https://raw.githubusercontent.com/jasonmoy28/Vocabulary_Learning_Project/master/data-raw/SSM.csv')
+LSM = read_csv('https://raw.githubusercontent.com/jasonmoy28/Vocabulary_Learning_Project/master/data-raw/LSM.csv')
+
+SSM_PC_mean = SSM %>% group_by(FinalTestCondition,TrainingTask) %>% summarise(mean = mean(CorrectPercentage))
+LSM_PC_mean = LSM %>% group_by(FinalTestCondition,TrainingTask) %>% summarise(mean = mean(CorrectPercentage))
+
+StrictScoringSummaryStatCorrect = 
   Rmisc::summarySEwithin(SSM,
                          idvar = 'Subject',
                          withinvars = 'TrainingTask',
                          betweenvars = 'FinalTestCondition',
-                         measurevar = 'Efficiency(Word Learned /Minute)') %>% 
-  mutate(`Efficiency(Word Learned /Minute)` = SSM_E_mean$mean) %>% 
-  rename(Efficiency = `Efficiency(Word Learned /Minute)`)
+                         measurevar = 'CorrectPercentage') %>% 
+  mutate(CorrectPercentage = SSM_PC_mean$mean)
 
-
-
-LenientScoringSummaryStatEfficiency = 
+LenientScoringSummaryStatCorrect = 
   Rmisc::summarySEwithin(LSM,
                          idvar = 'Subject',
                          withinvars = 'TrainingTask',
                          betweenvars = 'FinalTestCondition',
-                         measurevar = 'Efficiency (Word Learned/Minute)') %>% 
-  mutate(`Efficiency (Word Learned/Minute)` = LSM_E_mean$mean) %>% 
-  rename(Efficiency = `Efficiency (Word Learned/Minute)`)
+                         measurevar = 'CorrectPercentage') %>% 
+  mutate(CorrectPercentage = LSM_PC_mean$mean)
+```
 
-# SS + Productive
-SS_productive_E = StrictScoringSummaryStatEfficiency %>% filter(FinalTestCondition == 'CE') %>% 
+### Strict Scoring Productive Final Test 
+```{r SS + Productive}
+SS_productive_PC = StrictScoringSummaryStatCorrect %>% filter(FinalTestCondition == 'CE') %>% 
   ggplot(data =.,
-         aes(x = TrainingTask,y = Efficiency,fill = TrainingTask)) +
+         aes(x = TrainingTask,y = CorrectPercentage,fill = TrainingTask)) +
   geom_bar(stat = 'identity',width = 0.5,color = 'black') + 
-  geom_errorbar(aes(ymin = Efficiency - se, ymax = Efficiency + se), 
-                position=position_dodge(0.9),width = 0.05) + 
-  labs(y = 'Efficiency (Word Learned/Minute)',
+  geom_errorbar(aes(ymin = CorrectPercentage - se, ymax = CorrectPercentage + se), position=position_dodge(0.9),
+                width = 0.05) + 
+  labs(y = 'Proportion Correct',
        x = 'Strict Scoring - Productive Final Test') + # edit title here 
   scale_fill_manual(values = c('#eff3ff','#bdd7e7','#6baed6','#2171b5'),
                     labels = c('Productive','Receptive','Picture + Producive','Restudy'),
                     name = '') + 
   scale_x_discrete(labels=c("CE" = "Productive", "EC" = "Receptive",
                             "PI" = "Productive + Picture", 'RE' = 'Restudy')) + 
-  ylim(0,1.5) + 
+  ylim(0,0.5) + 
   theme_classic() +
   theme(legend.position=c(0.5,.9),
         legend.key.size = unit(0.4,'cm'),
@@ -48,25 +62,28 @@ SS_productive_E = StrictScoringSummaryStatEfficiency %>% filter(FinalTestConditi
         axis.ticks.x=element_blank(),
         aspect.ratio = .85, 
         panel.background = element_rect(colour = "black", size=1)) + 
-  geom_text(aes(label = format(Efficiency,digits = 3)),
+  geom_text(aes(label = format(CorrectPercentage,digits = 3)),
             vjust = 2.7,
             colour = c('#000000','#000000','#000000','#FFFFFF'))
+print(SS_productive_PC)
+```
 
-## SS + receptive 
-SS_receptive_E = StrictScoringSummaryStatEfficiency %>% filter(FinalTestCondition == 'EC') %>% 
+### Strict Scoring Receptive Final Test
+```{r SS + Receptive}
+SS_receptive_PC = SS_productive_graph = StrictScoringSummaryStatCorrect %>% filter(FinalTestCondition == 'EC') %>% 
   ggplot(data =.,
-         aes(x = TrainingTask,y = Efficiency,fill = TrainingTask)) +
+         aes(x = TrainingTask,y = CorrectPercentage,fill = TrainingTask)) +
   geom_bar(stat = 'identity',width = 0.5,color = 'black') + 
-  geom_errorbar(aes(ymin = Efficiency - se, ymax = Efficiency + se), 
-                position=position_dodge(0.9),width = 0.05) + 
-  labs(y = 'Efficiency (Word Learned/Minute)',
+  geom_errorbar(aes(ymin = CorrectPercentage - se, ymax = CorrectPercentage + se), position=position_dodge(0.9),
+                width = 0.05) + 
+  labs(y = 'Proportion Correct',
        x = 'Strict Scoring - Receptive Final Test') + # edit title here 
   scale_fill_manual(values = c('#eff3ff','#bdd7e7','#6baed6','#2171b5'),
                     labels = c('Productive','Receptive','Picture + Producive','Restudy'),
                     name = '') + 
   scale_x_discrete(labels=c("CE" = "Productive", "EC" = "Receptive",
                             "PI" = "Productive + Picture", 'RE' = 'Restudy')) + 
-  ylim(0,1.5) + 
+  ylim(0,0.5) + 
   theme_classic() +
   theme(legend.position=c(0.5,.9),
         legend.key.size = unit(0.4,'cm'),
@@ -76,26 +93,28 @@ SS_receptive_E = StrictScoringSummaryStatEfficiency %>% filter(FinalTestConditio
         axis.ticks.x=element_blank(),
         aspect.ratio = .85, 
         panel.background = element_rect(colour = "black", size=1)) + 
-  geom_text(aes(label = format(Efficiency,digits = 3)),
+  geom_text(aes(label = format(CorrectPercentage,digits = 3)),
             vjust = 2.7,
             colour = c('#000000','#000000','#000000','#FFFFFF'))
+print(SS_receptive_PC)
+```
 
-
-# LS + Productive
-LS_productive_E = LenientScoringSummaryStatEfficiency %>% filter(FinalTestCondition == 'CE') %>% 
+### Lenient Scoring Productive Final Test
+```{r LS + Productive}
+LS_productive_PC = LenientScoringSummaryStatCorrect %>% filter(FinalTestCondition == 'CE') %>% 
   ggplot(data =.,
-         aes(x = TrainingTask,y = Efficiency,fill = TrainingTask)) +
+         aes(x = TrainingTask,y = CorrectPercentage,fill = TrainingTask)) +
   geom_bar(stat = 'identity',width = 0.5,color = 'black') + 
-  geom_errorbar(aes(ymin = Efficiency - se, ymax = Efficiency + se), 
-                position=position_dodge(0.9),width = 0.05) + 
-  labs(y = 'Efficiency (Word Learned/Minute)',
+  geom_errorbar(aes(ymin = CorrectPercentage - se, ymax = CorrectPercentage + se), position=position_dodge(0.9),
+                width = 0.05) + 
+  labs(y = 'Proportion Correct',
        x = 'Lenient Scoring - Productive Final Test') + # edit title here 
   scale_fill_manual(values = c('#eff3ff','#bdd7e7','#6baed6','#2171b5'),
                     labels = c('Productive','Receptive','Picture + Producive','Restudy'),
                     name = '') + 
   scale_x_discrete(labels=c("CE" = "Productive", "EC" = "Receptive",
                             "PI" = "Productive + Picture", 'RE' = 'Restudy')) + 
-  ylim(0,1.5) + 
+  ylim(0,0.5) + 
   theme_classic() +
   theme(legend.position=c(0.5,.9),
         legend.key.size = unit(0.4,'cm'),
@@ -105,26 +124,28 @@ LS_productive_E = LenientScoringSummaryStatEfficiency %>% filter(FinalTestCondit
         axis.ticks.x=element_blank(),
         aspect.ratio = .85, 
         panel.background = element_rect(colour = "black", size=1)) + 
-  geom_text(aes(label = format(Efficiency,digits = 3)),
+  geom_text(aes(label = format(CorrectPercentage,digits = 3)),
             vjust = 2.7,
             colour = c('#000000','#000000','#000000','#FFFFFF'))
+print(LS_productive_PC)
+```
 
-
-#LS + receptive
-LS_receptive_E = LenientScoringSummaryStatEfficiency %>% filter(FinalTestCondition == 'EC') %>% 
+### Lenient Scoring Receptive Final Test
+```{r LS + Receptive}
+LS_receptive_PC = LenientScoringSummaryStatCorrect %>% filter(FinalTestCondition == 'EC') %>% 
   ggplot(data =.,
-         aes(x = TrainingTask,y = Efficiency,fill = TrainingTask)) +
+         aes(x = TrainingTask,y = CorrectPercentage,fill = TrainingTask)) +
   geom_bar(stat = 'identity',width = 0.5,color = 'black') + 
-  geom_errorbar(aes(ymin = Efficiency - se, ymax = Efficiency + se), 
-                position=position_dodge(0.9),width = 0.05) + 
-  labs(y = 'Efficiency (Word Learned/Minute)',
+  geom_errorbar(aes(ymin = CorrectPercentage - se, ymax = CorrectPercentage + se), position=position_dodge(0.9),
+                width = 0.05) + 
+  labs(y = 'Proportion Correct',
        x = 'Lenient Scoring - Receptive Final Test') + # edit title here 
   scale_fill_manual(values = c('#eff3ff','#bdd7e7','#6baed6','#2171b5'),
                     labels = c('Productive','Receptive','Picture + Producive','Restudy'),
                     name = '') + 
   scale_x_discrete(labels=c("CE" = "Productive", "EC" = "Receptive",
                             "PI" = "Productive + Picture", 'RE' = 'Restudy')) + 
-  ylim(0,1.5) + 
+  ylim(0,0.5) + 
   theme_classic() +
   theme(legend.position=c(0.5,.9),
         legend.key.size = unit(0.4,'cm'),
@@ -134,31 +155,31 @@ LS_receptive_E = LenientScoringSummaryStatEfficiency %>% filter(FinalTestConditi
         axis.ticks.x=element_blank(),
         aspect.ratio = .85, 
         panel.background = element_rect(colour = "black", size=1)) + 
-  geom_text(aes(label = format(Efficiency,digits = 3)),
+  geom_text(aes(label = format(CorrectPercentage,digits = 3)),
             vjust = 2.7,
             colour = c('#000000','#000000','#000000','#FFFFFF'))
+print(LS_receptive_PC)
+```
 
-# Output picture 
-jpg_name = paste('SS_productive_E','.jpg',sep = '')
+```{r Output picture, eval = F}
+# Output picture
+jpg_name = paste('SS_productive_PC','.jpg',sep = '')
 jpeg(jpg_name,width = 550,height = 430,res = 100)
-SS_productive_E
+SS_productive_PC
 dev.off()
 
-jpg_name = paste('SS_receptive_E','.jpg',sep = '')
+jpg_name = paste('SS_receptive_PC','.jpg',sep = '')
 jpeg(jpg_name,width = 550,height = 430,res = 100)
-SS_receptive_E
+SS_receptive_PC
 dev.off()
 
-jpg_name = paste('LS_productive_E','.jpg',sep = '')
+jpg_name = paste('LS_productive_PC','.jpg',sep = '')
 jpeg(jpg_name,width = 550,height = 430,res = 100)
-LS_productive_E
+LS_productive_PC
 dev.off()
 
-jpg_name = paste('LS_receptive_E','.jpg',sep = '')
+jpg_name = paste('LS_receptive_PC','.jpg',sep = '')
 jpeg(jpg_name,width = 550,height = 430,res = 100)
-LS_receptive_E
+LS_receptive_PC
 dev.off()
-
-
-
-
+```
