@@ -19,7 +19,7 @@ navbar:
       text: Manuscript
       menu:
       - text: Manuscript
-        href: manuscript/Moy_Jason_honorthesis_2020.pdf
+        href: Manuscript/Moy_Jason_honorthesis_2020.pdf
     articles:
       text: Graph
       menu:
