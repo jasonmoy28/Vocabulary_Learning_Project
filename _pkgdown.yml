@@ -6,7 +6,10 @@ navbar:
     - home
     - manuscript
     - articles
+    - slides
     - posters
+    - experiments
+    - reference
     right: github
   components:
     home:
@@ -15,15 +18,15 @@ navbar:
     manuscript:
       text: Manuscript
       menu:
-      - text: APA6 PDF
+      - text: Manuscript
         href: manuscript/Moy_Jason_honorthesis_2020.pdf
     articles:
-      text: graph
+      text: Graph
       menu:
       - text: Efficiency Graph
-        href: articles/graph/efficiency_graph.html
+        href: articles/efficiency_graph.html
       - text: Proportion Correct Graph
-        href: articles/graph/proportion_correct_graph.html
+        href: articles/proportion_correct_graph.html
     posters:
       text: Posters
       menu:
