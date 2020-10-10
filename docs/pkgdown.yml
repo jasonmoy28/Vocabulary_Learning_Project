@@ -3,7 +3,6 @@ pkgdown: 1.6.1
 pkgdown_sha: ~
 articles:
   efficiency_graph: efficiency_graph.html
-  manuscript: manuscript.html
   proportion_correct_graph: proportion_correct_graph.html
-last_built: 2020-10-10T10:09Z
+last_built: 2020-10-10T10:49Z
 
