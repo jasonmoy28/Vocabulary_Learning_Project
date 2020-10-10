@@ -1,0 +1,44 @@
+# see https://pkgdown.r-lib.org/articles/pkgdown.html for yml help
+
+navbar:
+  structure:
+    left:
+    - home
+    - manuscript
+    - articles
+    - posters
+    right: github
+  components:
+    home:
+      icon: fa-home fa-lg
+      href: index.html
+    manuscript:
+      text: Manuscript
+      menu:
+      - text: APA6 PDF
+        href: manuscript/Moy_Jason_honorthesis_2020.pdf
+    articles:
+      text: Supplementary
+      menu:
+      - text: Supplementary
+        href: articles/som.html
+    posters:
+      text: Posters
+      menu:
+      - text: Poster
+        href: posters/Moy_Jason_Poster.pdf
+    reference:
+      text: Functions
+      href: reference/index.html
+    github:
+      text: source code
+      icon: fa-lg fa-github
+      href: https://github.com/user/repo
+
+home:
+  strip_header: true
+  links:
+    - text: Dr Rickard's Cognition And Cognitive Neuroscience Laboratory
+      href: https://rickardlab.ucsd.edu/index.html
+  Authors:
+    - text: Jason Moy & Timothy Rickard Ph.D

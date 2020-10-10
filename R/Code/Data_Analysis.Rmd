@@ -1,0 +1,590 @@
+---
+title: "Vocabulary Learning Experiment Data Summary"
+author: "Jason Moy"
+date: "1/14/2020"
+output: pdf_document
+---
+```{r setup,include =FALSE}
+suppressMessages(library('tidyverse'))
+library('reticulate')
+use_condaenv(condaenv = 'anaconda3',conda = '/Users/Jasonmoy/opt/anaconda3/bin/conda')
+```
+
+# Validation 
+## Training Task Time 
+```{r Initial setup, include = F}
+suppressMessages(library('readr'))
+suppressMessages(library('tidyverse'))
+suppressMessages(library('rstatix'))
+S1 = read_csv('S1.csv')
+S2 = read_csv('S2.csv')
+
+LenientScoreRawData = read.csv('/Users/Jasonmoy/Desktop/Research/Vocabulary Learing Project/Code/LenientScoringMaster.csv') %>% rename(Subject = 1)
+LenientScoreRawData = LenientScoreRawData %>% rename(Code = FinalCode) %>% mutate(Code = as.numeric(as.character(Code)))
+
+#Exclude subject have 10+ known words 
+ExtraSubject = c(4,49,61,74,92,93,96,121,128,132,135,153,158,200,201,208,212,219,258)
+S1 = S1 %>% filter(!Subject %in% ExtraSubject)
+
+S2 = S2 %>% filter(!Subject %in% ExtraSubject)
+LSM = read_csv('/Users/Jasonmoy/Desktop/LSM.csv')
+# Exclude subject for other reasons 
+## Subject 136 is excluded since the participants enter NA for all value 
+AddtionalExlcusion = c(136)
+S1 = S1 %>% filter(!Subject %in% AddtionalExlcusion)
+S2 = S2 %>% filter(!Subject %in% AddtionalExlcusion)
+```
+
+```{r Extract df for CE block,include = F}
+
+CE_df = S1 %>% select(Subject,CEAns,CEcorrect,CECorrectAns,CEStart,CEEnd,CEFeedback.RT) %>% 
+  filter(!is.na(CECorrectAns))  #used 'CECorrectAns' NA to filter out all NA value
+
+#Caculate the response time (add 100 for slide presentation)
+CE_df = CE_df %>%  mutate(`ResponseTime(s)` = (CEEnd - CEStart + CEFeedback.RT+100)/1000) %>% 
+  select(Subject,CECorrectAns,`ResponseTime(s)`) %>% 
+  arrange(Subject)
+  
+#Caculate how long it takes for each participants to complete the CE block 
+CE_blockTime = CE_df %>% 
+  group_by(Subject) %>% 
+  summarise(`CE_BlockTime(s)` = sum(`ResponseTime(s)`))
+```
+
+```{r Extract df for EC block,include = F}
+
+EC_df = S1 %>% select(Subject,ECAns,ECcorrect,ECCorrectAns,ECStart,ECEnd,ECfeedback.RT,`English[SubTrial]`) %>% 
+  filter(!is.na(ECCorrectAns))  #used 'ECCorrectAns' NA to filter out all NA value
+
+#Caculate the response time (add 100 for initial presentation)
+EC_df = EC_df %>%  
+  mutate(`ResponseTime(s)` = (ECEnd - ECStart + ECfeedback.RT+100)/1000) %>%
+  select(Subject,`English[SubTrial]`,`ResponseTime(s)`) %>% 
+  arrange(Subject)
+  
+
+EC_blockTime = EC_df %>% 
+  group_by(Subject) %>% 
+  summarise(`EC_BlockTime(s)` = sum(`ResponseTime(s)`))
+```
+
+```{r Extract df for PI block,include = F}
+
+PI_df = S1 %>% select(Subject,PIAns:PICorrectAns,PIStart,PIEnd,PIFeedback.RT) %>%
+  filter(!is.na(PICorrectAns))  #used 'PICorrectAns' NA to filter out all NA value
+
+#Caculate the response time (add 100 for initial presentation)
+PI_df = PI_df %>%  mutate(`ResponseTime(s)` = (PIEnd - PIStart + PIFeedback.RT + 100)/1000) %>% 
+  select(Subject,PICorrectAns,`ResponseTime(s)`) %>% 
+  arrange(Subject)
+
+
+PI_blockTime = PI_df %>% 
+  group_by(Subject) %>% 
+  summarise(`PI_BlockTime(s)` = sum(`ResponseTime(s)`))
+```
+
+```{r Extract df for RE block,include = F}
+
+RE_df = S1 %>% select(Subject,REEnglish,RESlide.RT) %>% 
+  filter(!is.na(RESlide.RT))  #used 'RESlide.RT' NA to filter out all NA value
+
+RE_df = RE_df %>%  
+  mutate(`ResponseTime(s)` = RESlide.RT/1000) %>%
+  select(Subject,REEnglish,`ResponseTime(s)`) %>%
+  arrange(Subject)
+  
+RE_blockTime = RE_df %>% 
+  group_by(Subject) %>% 
+  summarise(`RE_BlockTime(s)` = sum(`ResponseTime(s)`))
+```
+
+```{r Table of block time grouped by training task and participants,echo = F,comment = NA}
+summary_BlockTime = bind_cols(Subject = CE_blockTime$Subject,CE_blockTime[2],PI_blockTime[2],EC_blockTime[2],RE_blockTime[2])
+
+TotalBlockTime = summary_BlockTime %>% summarise(.,
+                                `CE_BlockTime(s)` = mean(`CE_BlockTime(s)`),
+                                `PI_BlockTime(s)`  = mean(`PI_BlockTime(s)`),
+                                `EC_BlockTime(s)` = mean(`EC_BlockTime(s)`),
+                                `RE_BlockTime(s)` = mean(`RE_BlockTime(s)`))
+
+TotalBlockTime = cbind(data.frame(Subject = 'Total'),TotalBlockTime)
+TotalBlockTime = rbind(summary_BlockTime,TotalBlockTime)
+
+#Create the final table (modified variable name here)
+BlockTimeTable = TotalBlockTime %>% 
+  rename(`CE Time(s)` = `CE_BlockTime(s)`,`PI Time(s)` = `PI_BlockTime(s)`,`EC Time(s)` = `EC_BlockTime(s)`,`RE Time(s)` = `RE_BlockTime(s)`)
+```
+
+```{r Graph of block time,echo =F, fig.width=15,fig.height=7}
+#graph of block time 
+graphTable = BlockTimeTable[1:(nrow(BlockTimeTable)-1),]
+graphTable %>% 
+  mutate(Subject = 1:(nrow(graphTable))) %>%
+  pivot_longer(cols = colnames(graphTable)[2:5],names_to = 'Condition',values_to = 'Response Time (4 trials)') %>% 
+  ggplot(.,aes(x = Subject,y = `Response Time (4 trials)`,color = Condition)) +
+  geom_point() + 
+  geom_line() + 
+  scale_x_continuous(breaks = seq(1,length(summary_BlockTime$Subject),1)) + 
+  theme_bw() + 
+  theme(axis.title = element_text(size = 15),
+        legend.title = element_text(size = 17),
+        legend.text = element_text(size = 15),
+        axis.text = element_text(size = 14),
+        legend.text.align = 0)
+```
+
+## Table of Known Words (grouped by word)
+```{r Table of Known Words (grouped by word), echo = F,comment = NA}
+Table1= S1 %>% 
+  select(Subject,StudySlide.RESP,`English[Block]`) %>% 
+  rename(`English Words` = `English[Block]`) %>% 
+  mutate(StudySlide.RESP = if_else(`StudySlide.RESP` == 'y',1,0)) %>% 
+  filter(!is.na(`English Words`)) %>% 
+  group_by(`English Words`) %>% 
+  summarise(`Known Word` = sum(`StudySlide.RESP`,na.rm = T)) %>% 
+  arrange(desc(`Known Word`))
+
+TableofUnknownWords = cbind(Table1[1:24,],Table1[25:48,])
+print.data.frame(TableofUnknownWords,row.names = F)          
+```
+## Table of Known Words (grouped by subject)
+
+```{r Table of Known Words (grouped by subject),echo = F,comment = NA}
+Table2 = S1 %>% 
+  select(Subject,StudySlide.RESP,`English[Block]`) %>% 
+  rename(`English Words` = `English[Block]`) %>% 
+  mutate(StudySlide.RESP = if_else(`StudySlide.RESP` == 'y',1,0)) %>% 
+  filter(!is.na(`English Words`)) %>% 
+  group_by(Subject) %>% 
+  summarise(`Known Word` = sum(`StudySlide.RESP`,na.rm = T)) %>% 
+  arrange(Subject)
+Table2[104:105,1:2] = NA
+Table2_1 = Table2[1:35,]
+Table2_2 = Table2[36:70,]
+Table2_3 = Table2[71:105,]
+Table2_combined = cbind(Table2_1,Table2_2,Table2_3)
+print.data.frame(Table2_combined,row.names = F)
+```
+
+```{r Cleaning S1 data for final analysis ,echo = F,comment = NA,include=F}
+#S1 Data: Creating a dataframe that specified the corresponding training condition for each word for every participants  
+
+#Reorganizing CE Data
+CE_df_s2 = CE_df %>% 
+  select(Subject,CECorrectAns,`ResponseTime(s)`) %>% 
+  rename(EnglishWord = CECorrectAns) %>% 
+  group_by(Subject,EnglishWord) %>% 
+  summarise(ResponseTime = sum(`ResponseTime(s)`)) %>% 
+  ungroup() %>% #create a dataframe that has response time, subject number and word 
+  mutate(Condition = 'CE') #assign training condition to each word 
+
+#Reorganizing EC data
+EC_df_s2 = EC_df %>% 
+  select(Subject,`English[SubTrial]`,`ResponseTime(s)`) %>% 
+  rename(EnglishWord = `English[SubTrial]`) %>% 
+  group_by(Subject,EnglishWord) %>% 
+  summarise(ResponseTime = sum(`ResponseTime(s)`)) %>% 
+  ungroup() %>% 
+  mutate(Condition = 'EC')
+
+#Reorganizing PI Data
+PI_df_s2 = PI_df %>% 
+  select(Subject,PICorrectAns,`ResponseTime(s)`) %>% 
+  rename(EnglishWord = PICorrectAns) %>% 
+  group_by(Subject,EnglishWord) %>% 
+  summarise(ResponseTime = sum(`ResponseTime(s)`)) %>% 
+  ungroup() %>% 
+  mutate(Condition = 'PI')
+
+#Reorganizing RE data 
+RE_df_s2 = RE_df %>% 
+  select(Subject,REEnglish,`ResponseTime(s)`) %>% 
+  rename(EnglishWord = REEnglish) %>% 
+  group_by(Subject,EnglishWord) %>% 
+  summarise(ResponseTime = sum(`ResponseTime(s)`)) %>% 
+  ungroup() %>% 
+  mutate(Condition = 'RE')
+
+
+S1_CombinedInitial = rbind(EC_df_s2,CE_df_s2,PI_df_s2,RE_df_s2) %>% 
+  rename(TrainingTask = Condition)
+
+#Ensuring only S1 & S2 have matched subject, remove any subject participate in only S1 but not in S2 
+S1_combined = S1_CombinedInitial %>% 
+  filter(Subject %in% unique(S2$Subject)) %>% 
+  rename(Subject_S1 = Subject) %>% 
+  arrange(Subject_S1,EnglishWord)
+```
+
+```{r Extracting known words,include=F}
+#Create a dataframe specified which items participants have prior knowledge
+#Extracting known word 
+KnownWordExclusion = S1 %>% 
+  filter(Subject %in% unique(S2$Subject)) %>% #Ensuring the exlcusion df have the same subject as the S1_combined df 
+  select(Subject,`English[Block]`,StudySlide.RESP) %>% 
+  filter(!is.na(`English[Block]`)) %>% 
+  arrange(Subject,`English[Block]`) #Arrange by subject and English term for later cbind 
+
+#Binding S1_combined & exclusion df 
+S1_validation_Final = cbind(S1_combined,KnownWordExclusion)
+#Validation check on whether S1_combined df and exlcusion df have the same item 
+if (any(S1_validation_Final$EnglishWord!=S1_validation_Final$`English[Block]`)){S1_validation_Final = NA}
+
+#Filtering out words that participants have prior knowledge for s1 dataset 
+S1_final = S1_validation_Final %>% 
+  filter(is.na(StudySlide.RESP)) %>% #retaining words that participants have no prior knowledge 
+  select(Subject_S1:TrainingTask,ResponseTime)
+```
+
+
+```{r Cleaning S2 data for final analysis,include = F}
+#Extracting S2 data
+S2 = S2 %>% 
+  filter(Subject %in% S1$Subject)
+#Extracting data for participants take EC final test  
+S2_EC = S2 %>% 
+  select(Subject,ECAns,ECcorrect,ECCorrectAns,English) %>% 
+  filter(!is.na(ECCorrectAns)) %>% 
+  rename(Ans = ECAns,
+         Correct = ECcorrect,
+         CorrectAns = ECCorrectAns) %>% 
+  mutate(FinalTestCondition = 'EC')
+
+#Extracting data for participants take CE final test  
+S2_CE = S2 %>% select(Subject,CEAns,CEcorrect,CECorrectAns,English) %>% 
+  filter(!is.na(CECorrectAns)) %>% 
+  rename(Ans = CEAns,
+         Correct = CEcorrect,
+         CorrectAns = CECorrectAns) %>% 
+  mutate(FinalTestCondition = 'CE')
+
+S2_combined = rbind(S2_EC,S2_CE) %>% 
+  rename(Subject_S2 = Subject) %>% 
+  arrange(Subject_S2,English) %>%
+  select(Subject_S2,Correct,Ans,CorrectAns,English,FinalTestCondition)
+
+
+#Excluding known word for S2 df 
+#Binding S2_combined and exlcusion dataframe 
+S2_validation_Final = cbind(S2_combined,KnownWordExclusion)
+#Validation check on whether dataframe are the same between exclusion df and combined df 
+if (any(S2_validation_Final$EnglishWord!=S2_validation_Final$`English[Block]`)){S2_validation_Final = NA}
+
+#Filtering out words that participants have prior knowledge for s2 dataset 
+S2_final = S2_validation_Final %>% 
+  filter(is.na(StudySlide.RESP)) %>% 
+  select(Subject_S2:FinalTestCondition)
+
+#Binding S1_final and S2_final to create a final dataframe 
+Combined_S1_S2 = cbind(S1_final,S2_final)
+
+#validation check on whether the combined dataframe are the same item based on word & subject number 
+if (any(Combined_S1_S2$EnglishWord != Combined_S1_S2$English)) {Combined_S1_S2 = NA}
+if(any(Combined_S1_S2$Subject_S1 != Combined_S1_S2$Subject_S2)) {Combined_S1_S2 = NA}
+
+# Recoding correct ans as 1 and incorrect ans as 0 for strict scoring result 
+Final_df = Combined_S1_S2 %>% 
+  rename(Subject = Subject_S1) %>% 
+  select(Subject,TrainingTask,FinalTestCondition,ResponseTime,Correct,Ans,CorrectAns) %>% 
+  mutate(Correct = if_else(Correct == 'Correct',1,0))
+
+```
+
+```{r Creating a dataframe for number of known words,echo = F,comment = NA}
+# Creating a dataframe to specified how many words participants need to learned (i.e. have no prior knowledge of) 
+LearningWord = Final_df %>% 
+  group_by(Subject,TrainingTask) %>% 
+  count() %>% 
+  ungroup() %>% 
+  arrange(Subject,TrainingTask) %>% 
+  rename(TrainingTaskCheck = TrainingTask,SubjectCheck = Subject) %>% #rename for validation check, and we can drop the column later 
+  mutate(SubjectCheck = rep(1:length(unique(Final_df$Subject)),each = 4)) %>% 
+  as.data.frame(.)
+```
+
+## Table of Known Words (grouped by block)
+```{r Table of Known Words (grouped by block),echo = F,comment = NA}
+WordBlock = S1_validation_Final %>% 
+  filter(Subject_S1 == 1) %>% 
+  group_by(TrainingTask,EnglishWord) %>% 
+  count() %>% 
+  select(1:2) %>% 
+  ungroup() %>% 
+  mutate(TrainingTask = case_when(
+    TrainingTask == 'CE' ~ 'Block 1',
+    TrainingTask == 'EC' ~ 'Block 2',
+    TrainingTask == 'RE' ~ 'Block 3',
+    TrainingTask == 'PI' ~ 'Block 4'))
+
+WordBlock = WordBlock %>% 
+  arrange(EnglishWord) %>% 
+  rename(EnglishTerm = EnglishWord,Block = TrainingTask)
+
+
+Rep_number = 0 
+Total_Rep_number = length(unique(S1_validation_Final$Subject_S1))-2
+WordBlockFinal = rbind(WordBlock,WordBlock)
+while (Rep_number < Total_Rep_number) {
+  WordBlockFinal = rbind(WordBlockFinal,WordBlock)
+  Rep_number = Rep_number + 1}
+
+TableUnkownWordByBlock_Cleaning = cbind(S1_validation_Final,WordBlockFinal) %>% 
+  mutate(StudySlide.RESP = if_else(StudySlide.RESP == 'y',1,0)) %>% 
+  group_by(Block) %>% 
+  summarise(`Known Word` = sum(StudySlide.RESP,na.rm = T))
+ 
+print.data.frame(TableUnkownWordByBlock_Cleaning,row.names = F)
+```
+
+```{r Strict Scoring master dataframe,include=F}
+#Strict scoring master dataframe
+StrictScoringMaster = Final_df %>% 
+  group_by(Subject,TrainingTask,FinalTestCondition) %>% 
+  summarise(Correct = sum(Correct),
+            `Time(Min)` = (sum(ResponseTime)/60),
+            `Efficiency(Word Learned /Minute)` = Correct/`Time(Min)`) %>% 
+  ungroup() %>% 
+  mutate(SubjectCheck = LearningWord$SubjectCheck,TrainingTaskCheck = LearningWord$TrainingTaskCheck,n = LearningWord$n) %>% 
+  mutate(Subject = rep(1:length(unique(Final_df$Subject)),each = 4))
+
+#Validation check on whether combination of learning word df and summary df is right 
+if (any(StrictScoringMaster$TrainingTask != StrictScoringMaster$TrainingTaskCheck)) {StrictScoringMaster = NA}
+if(any(StrictScoringMaster$Subject != StrictScoringMaster$SubjectCheck)) {StrictScoringMaster = NA}
+
+StrictScoringMaster = StrictScoringMaster %>% 
+  mutate(CorrectPercentage = Correct/n) %>% 
+  select(Subject,TrainingTask,FinalTestCondition,CorrectPercentage,`Efficiency(Word Learned /Minute)`,`Time(Min)`)
+  
+```
+
+```{r Lenient scoring master dataframe, include=F} 
+#Lenient scoring master dataframe 
+LenientScoringMaster = LenientScoreRawData %>% 
+  group_by(Subject,TrainingTask,FinalTestCondition) %>% 
+  summarise(Correct = sum(Code),
+            `ResponseTime(s)` = sum(ResponseTime)/60) %>% 
+  mutate(`Efficiency (Word Learned/Minute)` = Correct/`ResponseTime(s)`) %>% 
+  ungroup() %>% 
+  select(Subject,TrainingTask,FinalTestCondition,Correct,`Efficiency (Word Learned/Minute)`) %>% 
+  arrange(Subject,TrainingTask) %>% 
+  mutate(Subject = rep(1:length(unique(LenientScoreRawData$Subject)),each = 4)) %>% 
+  mutate(SubjectCheck = LearningWord$SubjectCheck,TrainingTaskCheck = LearningWord$TrainingTaskCheck,n = LearningWord$n) #combining learning word & leinent scoring master df 
+
+#Validation check on whether two dataframe is the same 
+if (any(LenientScoringMaster$TrainingTask != LenientScoringMaster$TrainingTaskCheck)) {LenientScoringMaster = NA}
+if(any(LenientScoringMaster$Subject != LenientScoringMaster$SubjectCheck)) {LenientScoringMaster = NA}
+
+# Cleaning for LS unadjusted time summary result 
+LenientScoringMaster = LenientScoringMaster %>% 
+  mutate(CorrectPercentage = Correct/n) %>% 
+  select(Subject,TrainingTask,FinalTestCondition,CorrectPercentage,`Efficiency (Word Learned/Minute)`)
+```
+
+## Table of Known Words (grouped by training task)
+```{r,echo=F,comment=NA}
+UnknownWordbyTraingTask = LearningWord %>% mutate(KnownWord = abs(n-12)) %>% 
+  rename(`Traning Task` = TrainingTaskCheck) %>% 
+  group_by(`Traning Task`) %>%
+  summarise(`Known Word` = sum(KnownWord))
+print.data.frame(UnknownWordbyTraingTask,row.names = F)
+```
+
+# Data Visualization 
+## Time Unadjusted Graph 
+### Strict Scoring Graph (time unadjusted)
+```{r includeF,echo = F,comment = NA,fig.width=15,fig.height=7,include=F}
+#Graph of strict scoring result (time unadjusted)
+ggplot(data = StrictScoringMaster,
+       aes(x = Subject,y = CorrectPercentage,color = TrainingTask)) + 
+  geom_point() + 
+  geom_line() +
+  theme_bw()+
+  scale_x_continuous(breaks = seq(1,length(unique(StrictScoringMaster$Subject)),2)) + 
+  theme(axis.title = element_text(size = 15),
+        legend.title = element_text(size = 17),
+        legend.text = element_text(size = 15),
+        axis.text = element_text(size = 14),
+        legend.text.align = 0,
+        strip.text.x = element_text(size = 15)) + 
+  facet_wrap('FinalTestCondition')
+```
+
+### Leninent Scoring Graph (time unadjusted)
+```{r Leninent Scoring Graph,include =F, echo=F,comment=NA,fig.width=15,fig.height=7}
+#Graph of leninent scoring result (time unadjusted)
+ggplot(data = LenientScoringMaster,
+       aes(x = Subject,y = CorrectPercentage,color = TrainingTask)) + 
+  geom_point() + 
+  geom_line() +
+  scale_x_continuous(breaks = seq(1,length(unique(LenientScoringMaster$Subject)),2)) + 
+  theme_bw() + 
+  theme(axis.title = element_text(size = 15),
+        legend.title = element_text(size = 17),
+        legend.text = element_text(size = 15),
+        axis.text = element_text(size = 14),
+        legend.text.align = 0,
+        strip.text.x = element_text(size=15)) + 
+  facet_wrap('FinalTestCondition')
+```
+
+## Time Adjusted Graph
+### Strict Scoring Graph (time adjusted)
+```{r Strict scoring graph includeF,echo = F,comment = NA,fig.width=15,fig.height=7,include=F}
+ggplot(data = StrictScoringMaster,
+       aes(x = Subject,y = `Efficiency(Word Learned /Minute)`,color = TrainingTask)) + 
+  geom_point() + 
+  geom_line()+
+  scale_x_continuous(breaks = seq(1,length(unique(StrictScoringMaster$Subject)),1)) + 
+  theme_bw() + 
+  theme(axis.title = element_text(size = 15),
+        legend.title = element_text(size = 17),
+        legend.text = element_text(size = 15),
+        axis.text = element_text(size = 14),
+        legend.text.align = 0,
+        strip.text.x = element_text(size=15)) + 
+  facet_wrap('FinalTestCondition')
+```
+
+### Lenient Scoring Graph (time adjusted)
+```{r Lenient Scoring Graph (time adjusted), echo = F,comment = NA,fig.width=15,fig.height=7}
+#Graph 
+ggplot(data = LenientScoringMaster,
+       aes(x = Subject,y = `Efficiency (Word Learned/Minute)`,color = TrainingTask)) + 
+  geom_point() + 
+  geom_line()+
+  scale_x_continuous(breaks = seq(1,length(unique(LenientScoringMaster$Subject)),2)) + 
+  theme_bw() + 
+  theme(axis.title = element_text(size = 15),
+        legend.title = element_text(size = 17),
+        legend.text = element_text(size = 15),
+        axis.text = element_text(size = 14),
+        legend.text.align = 0,
+        strip.text.x = element_text(size=15)) + 
+  facet_wrap('FinalTestCondition')
+```
+\newpage
+
+# Statistical Test Result 
+## Time Unadjusted Result
+### Strict Scoring Result (time unadjusted)  
+
+```{r,echo = F,comment = NA}
+#Transform subject into character for ANOVA 
+
+StrictScoringMaster = StrictScoringMaster %>% mutate(Subject = as.character(Subject))
+StrictScoringEC = StrictScoringMaster %>% filter(FinalTestCondition == 'EC')
+StrictScoringCE = StrictScoringMaster %>% filter(FinalTestCondition == 'CE')
+
+summary(aov(data = StrictScoringEC, CorrectPercentage ~ TrainingTask + Error(Subject/(TrainingTask))))
+
+summary(aov(data = StrictScoringCE, CorrectPercentage ~ TrainingTask + Error(Subject/(TrainingTask))))
+```
+  
+### Lenient Scoring Result (time unadjusted)  
+
+```{r ,echo = F,comment = NA}
+#Transform subject into character for ANOVA 
+LenientScoringMaster = LenientScoringMaster %>% mutate(Subject = as.character(Subject))
+
+summary(aov(data = LenientScoringMaster, CorrectPercentage ~ FinalTestCondition*TrainingTask + Error(Subject/(TrainingTask))))
+```
+\newpage
+
+```{r,echo = F,comment = NA,fig.height=4}
+#Strict scoring graph
+
+StrictScoringSummaryStatCorrect = Rmisc::summarySEwithin(StrictScoringMaster,
+                       idvar = 'Subject',
+                       withinvars = 'TrainingTask', 
+                       betweenvars = 'FinalTestCondition',
+                       measurevar = 'CorrectPercentage')
+
+StrictScoringSummaryStatCorrect %>% 
+  ggplot(data =.,
+       aes(x = FinalTestCondition,y = CorrectPercentage,fill = TrainingTask)) +
+  geom_bar(stat = 'identity',position = 'dodge') + 
+  geom_errorbar(aes(ymin = CorrectPercentage - se, ymax = CorrectPercentage + se), position=position_dodge(0.9),
+                width = 0.1) + 
+  theme_bw() + 
+  labs(title = 'Strict Scoring Result Graph (mean)',
+       subtitle = 'Time Unadjusted') + 
+  scale_fill_manual(values = c('#eff3ff','#bdd7e7','#6baed6','#2171b5'))
+
+
+
+#Lenient Scoring graph
+LenientScoringSummaryStatCorrect= Rmisc::summarySEwithin(LSM,
+                       idvar = 'Subject',
+                       withinvars = 'TrainingTask', 
+                       betweenvars = 'FinalTestCondition',
+                       measurevar = 'CorrectPercentage')
+
+LenientScoringSummaryStatCorrect %>% 
+  ggplot(data =.,
+         aes(x = FinalTestCondition,y = CorrectPercentage,fill = TrainingTask)) +
+  geom_bar(stat = 'identity',position ='dodge2') + 
+  geom_errorbar(aes(ymin = CorrectPercentage - se, ymax = CorrectPercentage + se), position=position_dodge(0.9),
+                width = 0.1) + 
+  labs(title = 'Lenient Scoring Result Graph (mean)',
+       subtitle = 'Time Unadjusted') + 
+  scale_fill_manual(values = c('#eff3ff','#bdd7e7','#6baed6','#2171b5'))
+
+```
+\newpage
+
+## Time Adjusted
+### Strict Scoring Result (time adjusted)  
+```{r,echo = F,comment = NA}
+#Transform subject into character for ANOVA 
+summary(aov(data = StrictScoringEC,`Efficiency(Word Learned /Minute)`~ TrainingTask + Error(Subject/(TrainingTask))))
+summary(aov(data = StrictScoringCE,`Efficiency(Word Learned /Minute)`~ TrainingTask + Error(Subject/(TrainingTask))))
+```
+  
+### Lenient Scoring Result (time adjusted)   
+
+```{r,echo = F,comment = NA}
+#Transform subject into character for ANOVA 
+summary(aov(data = LenientScoringMaster,`Efficiency (Word Learned/Minute)`~ FinalTestCondition*TrainingTask + Error(Subject/(TrainingTask))))
+```
+\newpage
+
+```{r,echo = F,comment = NA,fig.height=4}
+#Strict Scoring graph
+StrictScoringSummaryStatEfficiency= Rmisc::summarySEwithin(StrictScoringMaster,
+                       idvar = 'Subject',
+                       withinvars = 'TrainingTask', 
+                       betweenvars = 'FinalTestCondition',
+                       measurevar = 'Efficiency(Word Learned /Minute)')
+
+StrictScoringSummaryStatEfficiency %>% 
+  ggplot(data =.,
+       aes(x = FinalTestCondition,y = `Efficiency(Word Learned /Minute)`,fill = TrainingTask)) + 
+  geom_bar(stat = 'identity',position = 'dodge') + 
+  geom_errorbar(aes(ymin = `Efficiency(Word Learned /Minute)` - se, ymax = `Efficiency(Word Learned /Minute)` + se), position=position_dodge(0.9),width = 0.1) + 
+  theme_bw() + 
+  labs(title = 'Strict Scoring Result Graph (mean)',
+       subtitle = 'Time Adjusted')
+
+#Lenient scoring graph
+LenientScoringSummaryStatEfficiency = Rmisc::summarySEwithin(LenientScoringMaster,
+                       idvar = 'Subject',
+                       withinvars = 'TrainingTask', 
+                       betweenvars = 'FinalTestCondition',
+                       measurevar = 'Efficiency (Word Learned/Minute)')
+
+LenientScoringSummaryStatEfficiency %>% 
+  ggplot(data =.,
+       aes(x = FinalTestCondition,y = `Efficiency (Word Learned/Minute)`,fill = TrainingTask)) + 
+  geom_bar(stat = 'identity',position = 'dodge2') + 
+  geom_errorbar(aes(ymin = `Efficiency (Word Learned/Minute)` - se, ymax = `Efficiency (Word Learned/Minute)` + se), position=position_dodge(0.9),width = 0.1) + 
+  theme_bw() + 
+  labs(title = 'Lenient Scoring Result Graph (mean)',
+       subtitle = 'Time Adjusted') + 
+    scale_fill_manual(values = c('#eff3ff','#bdd7e7','#6baed6','#2171b5'))
+```
+
+```{r,echo = F,comment = NA}
+#Write final dataframe
+write_csv(LenientScoringMaster,'/Users/Jasonmoy/Desktop/LenientScoringFinal.csv')
+```
