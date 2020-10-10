@@ -34,9 +34,6 @@ navbar:
         href: posters/Moy_Jason_Poster.pdf
       - text: Poster Audio Explaination
         href: posters/Moy_Jason_Honor_Poster_Presentation.mp4
-    reference:
-      text: Functions
-      href: reference/index.html
     github:
       text: Source Code
       icon: fa-lg fa-github
