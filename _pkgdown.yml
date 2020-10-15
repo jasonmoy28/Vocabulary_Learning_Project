@@ -37,7 +37,7 @@ navbar:
     github:
       text: Source Code
       icon: fa-lg fa-github
-      href:
+      href: https://github.com/jasonmoy28/Vocabulary_Learning_Project
 
 home:
   strip_header: true
