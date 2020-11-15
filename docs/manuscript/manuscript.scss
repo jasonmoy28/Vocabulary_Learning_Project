@@ -1,0 +1,37 @@
+@import "../style/header";
+@import "../style/variable";
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: sans-serif;
+  font-weight: 400;
+  overflow-x: hidden;
+  overflow-y: scroll;
+}
+
+h1 {
+  display: flex;
+  justify-content: center;
+  padding: 3vh;
+  font-size: 32px;
+  font-weight: 400;
+}
+
+h2 {
+  display: flex;
+  justify-content: center;
+  padding: 0 0 3vh 0;
+  font-size: 17px;
+}
+
+.manuscript-desktop-container {
+  display: flex;
+  justify-content: center;
+  padding-bottom: 5vh;
+  iframe {
+    height: 100vh;
+    width: 80vw;
+  }
+}
