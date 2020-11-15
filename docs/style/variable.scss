@@ -1,0 +1,10 @@
+@mixin flexCenter($direction) {
+  display: flex;
+  flex-direction: $direction;
+  justify-content: center;
+  align-items: center;
+}
+
+$navBarColor: #f8f8f8;
+
+$textColor: #525151;

@@ -1,0 +1,84 @@
+@import "style/variable.scss";
+@import "style/header.scss";
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: sans-serif;
+  overflow-x: hidden;
+  /* !need to find a way to not add !important */
+}
+
+h1 {
+  display: flex;
+  justify-content: center;
+  padding: 3vh 0 1vh 0;
+  font-size: 20px;
+  font-weight: 400;
+}
+
+.content-container {
+  display: grid;
+  grid-template-columns: 2.5fr 1fr;
+  align-items: center;
+  padding: 10vh 2vw;
+}
+
+.paragraph-container {
+  display: flex;
+  align-self: start;
+  padding: 5vh;
+  p {
+    display: inline;
+    font-size: 15px;
+  }
+}
+
+.citation-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  a {
+    color: #222;
+    list-style: none;
+  }
+  h3 {
+    font-size: 15px;
+    font-weight: normal;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2vh 0;
+  }
+
+  #author {
+    p {
+      padding: 0.5vh;
+    }
+  }
+  #affliation {
+    p {
+      padding: 0.5vh;
+    }
+  }
+  #lab-link {
+    p {
+      padding: 0.5vh;
+    }
+  }
+  #source-code {
+    p {
+      padding: 0.5vh;
+    }
+    .container {
+      display: flex;
+      align-items: center;
+      img {
+        padding: 0.5vw;
+      }
+    }
+  }
+}

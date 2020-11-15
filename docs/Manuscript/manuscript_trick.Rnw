@@ -1,7 +1,0 @@
-\documentclass{article}
-\usepackage{pdfpages}
-
-\begin{document}
-\SweaveOpts{concordance=TRUE}
-\includepdf[pages=-, fitpaper=true]{Moy_Jason_honorthesis_2020.pdf}
-\end{document}

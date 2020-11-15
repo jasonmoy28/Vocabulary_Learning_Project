@@ -1,0 +1,82 @@
+@import "variable";
+
+.nav-bar {
+  display: flex;
+  width: 100vw;
+  margin: auto;
+  justify-content: space-between;
+  height: 20vh;
+  .flex-container-title {
+    display: flex;
+    align-items: center;
+    a {
+      color: rgb(0, 0, 0);
+      font-size: 16px;
+      font-weight: bold;
+    }
+  }
+  .flex-container-nav-bar {
+    display: flex;
+    justify-self: flex-end;
+    align-items: center;
+    padding-right: 5vw;
+  }
+  a {
+    padding: 0 2.5vw;
+    color: $textColor;
+    text-decoration: none;
+  }
+  a:hover {
+    color: rgb(0, 0, 0);
+  }
+}
+
+@media screen and (max-width: 768px) {
+  body {
+    width: 100vw;
+    position: relative;
+  }
+
+  .nav-bar {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-content: center;
+    right: 0;
+    height: 92vh;
+    width: 40vw;
+    padding-right: 0;
+    transform: translateX(100%);
+    transition: transform 0.5s ease-in;
+    background: #222;
+    z-index: 4;
+    li {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 3vh;
+    }
+  }
+
+  .nav-icon-mobile {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    right: 0;
+    cursor: pointer;
+    z-index: 4;
+    padding: 1rem 1rem;
+    span {
+      width: 1.2rem;
+      height: 3px;
+      margin: 0.1rem;
+      background: $textColor;
+    }
+  }
+
+  .nav-bar-active {
+    transform: translateX(0%);
+  }
+}
