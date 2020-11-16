@@ -1,0 +1,19 @@
+.content-container {
+  padding-bottom: 0;
+}
+
+.result-image-container {
+  display: -ms-grid;
+  display: grid;
+  -ms-grid-columns: 30vw 30vw;
+      grid-template-columns: 30vw 30vw;
+  width: 70vw;
+  padding-left: 5vh;
+  -webkit-transform: translateY(-25%);
+          transform: translateY(-25%);
+}
+
+.result-image-container img {
+  width: 30vw;
+}
+/*# sourceMappingURL=home-custom.css.map */

@@ -1,0 +1,13 @@
+.content-container {
+  padding-bottom: 0;
+}
+.result-image-container {
+  display: grid;
+  grid-template-columns: 30vw 30vw;
+  width: 70vw;
+  padding-left: 5vh;
+  transform: translateY(-25%);
+  img {
+    width: 30vw;
+  }
+}
