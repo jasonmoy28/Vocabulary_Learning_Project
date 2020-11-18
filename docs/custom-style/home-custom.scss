@@ -1,6 +1,7 @@
 .content-container {
   padding-bottom: 0;
 }
+
 .result-image-container {
   display: grid;
   grid-template-columns: 30vw 30vw;
@@ -9,5 +10,11 @@
   transform: translateY(-25%);
   img {
     width: 30vw;
+  }
+}
+
+@media (max-width: 800px) {
+  .result-image-container {
+    transform: translateY(0%);
   }
 }

@@ -16,4 +16,11 @@
 .result-image-container img {
   width: 30vw;
 }
+
+@media (max-width: 800px) {
+  .result-image-container {
+    -webkit-transform: translateY(0%);
+            transform: translateY(0%);
+  }
+}
 /*# sourceMappingURL=home-custom.css.map */
