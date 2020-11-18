@@ -18,15 +18,15 @@
     <nav>
       <div class="nav-bar-mobile"></div>
       <ul class="nav-bar">
-        <div class="flex-container-title">
+        <ul class="flex-container-title">
           <li><a href="index.html">Second-Language Vocabulary Learning</a></li>
-        </div>
-        <div class="flex-container-nav-bar">
+        </ul>
+        <ul class="flex-container-nav-bar">
           <li><a href="index.html">Home</a></li>
           <li><a href="manuscript.html">Manuscript</a></li>
           <li><a href="visualization.html">Visualization</a></li>
           <li><a href="poster.html">Poster</a></li>
-        </div>
+        </ul>
       </ul>
       <div class="nav-icon-mobile">
         <span class="line1"></span>
@@ -60,13 +60,24 @@
             discussed.
           </p>
         </div>
+
         <div class="citation-container">
           <h3 id="author">
             <p><b>Authors</b></p>
-            <p>Prof. Timothy Rickard & Jason Moy</p>
+            <!-- links to the authors' personal website, delete a-tag if no personal website exist -->
+            <p>
+              <a href="https://jasonmoy28.github.io/jasonmoy_personal_site/"
+                >Jason Moy</a
+              >
+              &
+              <a
+                href="https://psychology.ucsd.edu/people/profiles/trickard.html"
+                >Prof. Timothy Rickard</a
+              >
+            </p>
           </h3>
           <h3 id="affliation">
-            <p><b>Affliations</b></p>
+            <p><b>Affiliation</b></p>
             <p>UCSD</p>
           </h3>
           <h3 id="lab-link">
@@ -81,6 +92,7 @@
             <p><b>Source Code</b></p>
             <div class="container">
               <a
+                id="github-logo"
                 href="https://github.com/jasonmoy28/Vocabulary_Learning_Project"
                 target="_blank"
                 ><img src="static/logos/github-icon.svg" alt=""
