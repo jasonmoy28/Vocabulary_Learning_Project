@@ -13,8 +13,11 @@
   }
 }
 
-@media (max-width: 800px) {
+@media (max-width: 768px) {
   .result-image-container {
-    transform: translateY(0%);
+    display: none;
+  }
+  #title {
+    font-size: 0.9rem;
   }
 }

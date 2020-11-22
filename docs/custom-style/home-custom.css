@@ -17,10 +17,12 @@
   width: 30vw;
 }
 
-@media (max-width: 800px) {
+@media (max-width: 768px) {
   .result-image-container {
-    -webkit-transform: translateY(0%);
-            transform: translateY(0%);
+    display: none;
+  }
+  #title {
+    font-size: 0.9rem;
   }
 }
 /*# sourceMappingURL=home-custom.css.map */
